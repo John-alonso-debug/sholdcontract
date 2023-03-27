@@ -13,7 +13,7 @@ async function main() {
   console.log(
       `deployer  ${deployer.address}`
   );
-/////////////////////////////////////////
+  /////////////////////////////////////////
   //             DEPLOYING               //
   /////////////////////////////////////////
 
@@ -21,8 +21,6 @@ async function main() {
   const lib = await Lib.deploy();
   await lib.deployed();
 
-
-  console.log("\nDeploying Contracts\n");
 
   const token = await deployContract(deployer, "ERC20Token", []);
   await token.deployed();
@@ -46,8 +44,12 @@ async function main() {
   //await vault.deployed();
 
   console.log(
-    `vault deployed to ${vault.address}`
+      `AddressArray lib deployed to ${lib.address}`
   );
+  console.log(`contractTrustList deployed at: ${contractTrustList.address}\n`);
+
+
+
 }
 
 // We recommend this pattern to be able to use async/await everywhere
