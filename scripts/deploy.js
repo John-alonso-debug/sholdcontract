@@ -15,20 +15,33 @@ async function main() {
   console.log(
       `vault deployed to ${deployer.address}`
   );
-/////////////////////////////////////////
+  /////////////////////////////////////////
   //             DEPLOYING               //
   /////////////////////////////////////////
 
   console.log("\nDeploying Contracts\n");
+  const Lib = await ethers.getContractFactory("AddressArray");
+  const lib = await Lib.deploy();
+  await lib.deployed();
 
-  const trustlist = await deployContract(deployer, "TrustList",[0xeB21209ae4C2c9FF2a86ACA31E123764A3B6Bc06]);
-  await trustlist.deployed();
-  //const vault = await deployContract(deployer, "EFCRVVault",constants.curveAave);
-  //await vault.deployed();
+  const Contract = await ethers.getContractFactory("TrustList", {
+    signer: deployer,
+    libraries:{
+      AddressArray: lib.address
+    }
+  });
+  const contractTrustList = await Contract.deploy(["0x114A33FBAd98D27E91882aC8b1e0D1513A350216"]);
+
+
+  await contractTrustList.deployed();
 
   console.log(
-    `vault deployed to ${vault.address}`
+      `AddressArray lib deployed to ${lib.address}`
   );
+  console.log(`contractTrustList deployed at: ${contractTrustList.address}\n`);
+
+
+
 }
 
 // We recommend this pattern to be able to use async/await everywhere
