@@ -68,27 +68,27 @@ interface ICurve{
     function exchange(int128 i, int128 j, uint256 dx, uint256 min_dy) external payable returns(uint256);
 }
 
-contract UniswapV3Interface{
+interface UniswapV3Interface{
     function swapExactTokensForTokens(uint256 amountIn, uint256 amountOutMin, address[] calldata path, address to) external payable returns (uint256 amountOut);
 }
-contract CurveInterface256{
+interface CurveInterface256{
     function exchange(uint256 i, uint256 j, uint256 dx, uint256 min_dy) external payable returns(uint256);//change i to j
     //0 weth, 1 crv
 }
-contract CurveInterface128{
+interface CurveInterface128{
     function exchange(int128 i, int128 j, uint256 dx, uint256 min_dy) external returns(uint256);
     function get_dy(int128 i, int128 j, uint256 dx) external view returns(uint256);
     //0 crv, 1 cvxcrv
 }
-contract TriPoolInterface{
+interface TriPoolInterface{
     function remove_liquidity_one_coin(uint256 _token_amount, uint128 i, uint256 min_amount) external;//DAI, USDC, USDT
 }
-contract ConvexInterface{
-    function stake(uint256 amount) public returns(bool);
-    function withdraw(uint256 amount, bool claim) public returns(bool);
+interface ConvexInterface{
+    function stake(uint256 amount) external returns(bool);
+    function withdraw(uint256 amount, bool claim) external returns(bool);
     function getReward() external returns(bool);
-    function withdrawAll(bool claim) public;
+    function withdrawAll(bool claim) external;
 }
-contract ChainlinkInterface{
+interface ChainlinkInterface{
     function latestAnswer() external view returns (int256);
 }

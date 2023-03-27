@@ -25,17 +25,23 @@ module.exports = {
     deployments: "./deployments",
   },
 
+  providerOptions: {
+    allowUnlimitedContractSize: true,
+  },
+
   networks: {
     hardhat: {
       gasPrice: "auto",
       gasMultiplier: 2,
+      allowUnlimitedContractSize: true,
     },
     localnet: {
       // Ganache etc.
       url: "http://127.0.0.1:8545",
       gasPrice: "auto",
       gasMultiplier: 2,
-      blockGasLimit: 800000
+      // blockGasLimit: 800000,
+      allowUnlimitedContractSize: true,
     },
 
     mainnet: {

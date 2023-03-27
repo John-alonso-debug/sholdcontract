@@ -4,25 +4,44 @@
 // You can also run a script with `npx hardhat run <script>`. If you do that, Hardhat
 // will compile your contracts, add the Hardhat Runtime Environment's members to the
 // global scope, and execute the script.
-const hre = require("hardhat");
+const { ethers } = require("hardhat");
 const { deployContract, deployUpgradeable, verifyContract, verifyUpgradeable } = require("./utils");
-
-const constants = require("./constant");
 
 
 async function main() {
   const [deployer] = await ethers.getSigners();
   console.log(
-      `vault deployed to ${deployer.address}`
+      `deployer  ${deployer.address}`
   );
 /////////////////////////////////////////
   //             DEPLOYING               //
   /////////////////////////////////////////
 
+  const Lib = await ethers.getContractFactory("SafeMathR");
+  const lib = await Lib.deploy();
+  await lib.deployed();
+
+
   console.log("\nDeploying Contracts\n");
 
-  const trustlist = await deployContract(deployer, "TrustList",[0xeB21209ae4C2c9FF2a86ACA31E123764A3B6Bc06]);
-  await trustlist.deployed();
+  const token = await deployContract(deployer, "ERC20Token", []);
+  await token.deployed();
+  //const vault = await deployContract(deployer, "EFCRVVault",constants.curveAave);
+  //await vault.deployed();
+
+  console.log(
+    `ERC20Token deployed to ${token.address}`
+  );
+
+  const Contract = await ethers.getContractFactory("EFCRVVault", {
+    signer: deployer,
+    libraries:{
+      SafeMathR: lib.address
+    }
+  });
+  const vault = await Contract.deploy(token.address);
+  await vault.deployed();
+
   //const vault = await deployContract(deployer, "EFCRVVault",constants.curveAave);
   //await vault.deployed();
 

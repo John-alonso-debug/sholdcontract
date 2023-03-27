@@ -1,11 +1,243 @@
+/**
+ *Submitted for verification at Etherscan.io on 2022-06-08
+*/
+
+// File: contracts/utils/Ownable.sol
+
 pragma solidity >=0.4.21 <0.6.0;
 
-import "../utils/Ownable.sol";
-import "../utils/SafeMath.sol";
-import "../utils/Address.sol";
-import "../utils/ReentrancyGuard.sol";
-import "../erc20/SafeERC20.sol";
-import "./Interfaces.sol";
+contract Ownable {
+    address private _contract_owner;
+
+    event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
+
+    /**
+     * @dev Initializes the contract setting the deployer as the initial owner.
+     */
+    constructor () internal {
+        address msgSender = msg.sender;
+        _contract_owner = msgSender;
+        emit OwnershipTransferred(address(0), msgSender);
+    }
+
+    /**
+     * @dev Returns the address of the current owner.
+     */
+    function owner() public view returns (address) {
+        return _contract_owner;
+    }
+
+    /**
+     * @dev Throws if called by any account other than the owner.
+     */
+    modifier onlyOwner() {
+        require(_contract_owner == msg.sender, "Ownable: caller is not the owner");
+        _;
+    }
+
+    /**
+     * @dev Transfers ownership of the contract to a new account (`newOwner`).
+     * Can only be called by the current owner.
+     */
+    function transferOwnership(address newOwner) public onlyOwner {
+        _transferOwnership(newOwner);
+    }
+
+    /**
+     * @dev Transfers ownership of the contract to a new account (`newOwner`).
+     */
+    function _transferOwnership(address newOwner) internal {
+        require(newOwner != address(0), "Ownable: new owner is the zero address");
+        emit OwnershipTransferred(_contract_owner, newOwner);
+        _contract_owner = newOwner;
+    }
+}
+
+// File: contracts/utils/SafeMath.sol
+
+pragma solidity >=0.4.21 <0.6.0;
+
+library SafeMathR {
+    function safeAdd(uint a, uint b) public pure returns (uint c) {
+        c = a + b;
+        require(c >= a, "add");
+    }
+    function safeSubR(uint a, uint b, string memory s) public pure returns (uint c) {
+        require(b <= a, s);
+        c = a - b;
+    }
+    function safeSub(uint a, uint b) public pure returns (uint c) {
+        require(b <= a, "sub");
+        c = a - b;
+    }
+    function safeMul(uint a, uint b) public pure returns (uint c) {
+        c = a * b;
+        require(a == 0 || c / a == b, "mul");
+    }
+    function safeDiv(uint a, uint b) public pure returns (uint c) {
+        require(b > 0, "div");
+        c = a / b;
+    }
+    function safeDivR(uint a, uint b, string memory s) public pure returns (uint c) {
+        require(b > 0, s);
+        c = a / b;
+    }
+}
+
+// File: contracts/utils/Address.sol
+
+pragma solidity >=0.4.21 <0.6.0;
+
+library Address {
+    function isContract(address account) internal view returns (bool) {
+        bytes32 codehash;
+        bytes32 accountHash = 0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470;
+        // solhint-disable-next-line no-inline-assembly
+        assembly { codehash := extcodehash(account) }
+        return (codehash != 0x0 && codehash != accountHash);
+    }
+    function toPayable(address account) internal pure returns (address payable) {
+        return address(uint160(account));
+    }
+    function sendValue(address payable recipient, uint256 amount) internal {
+        require(address(this).balance >= amount, "Address: insufficient balance");
+
+        // solhint-disable-next-line avoid-call-value
+        (bool success, ) = recipient.call.value(amount)("");
+        require(success, "Address: unable to send value, recipient may have reverted");
+    }
+}
+
+// File: contracts/utils/ReentrancyGuard.sol
+
+pragma solidity >=0.4.21 <0.6.0;
+
+contract ReentrancyGuard {
+    uint256 private _guardCounter;
+
+    constructor () internal {
+        _guardCounter = 1;
+    }
+
+    modifier nonReentrant() {
+        _guardCounter += 1;
+        uint256 localCounter = _guardCounter;
+        _;
+        require(localCounter == _guardCounter, "ReentrancyGuard: reentrant call");
+    }
+}
+
+// File: contracts/erc20/IERC20.sol
+
+pragma solidity >=0.4.21 <0.6.0;
+
+interface IERC20 {
+    function totalSupply() external view returns (uint256);
+    function balanceOf(address account) external view returns (uint256);
+    function transfer(address recipient, uint256 amount) external returns (bool);
+    function allowance(address owner, address spender) external view returns (uint256);
+    function approve(address spender, uint256 amount) external returns (bool);
+    function transferFrom(address sender, address recipient, uint256 amount) external returns (bool);
+    event Transfer(address indexed from, address indexed to, uint256 value);
+    event Approval(address indexed owner, address indexed spender, uint256 value);
+}
+
+interface ERC20Property{
+  function name() external view returns (string memory);
+  function symbol() external view returns (string memory);
+  function decimals() external view returns (uint8);
+}
+
+// File: contracts/erc20/SafeERC20.sol
+
+pragma solidity >=0.4.21 <0.6.0;
+
+
+
+
+library SafeERC20 {
+    using SafeMathR for uint256;
+    using Address for address;
+
+    function safeTransfer(IERC20 token, address to, uint256 value) internal {
+        callOptionalReturn(token, abi.encodeWithSelector(token.transfer.selector, to, value));
+    }
+
+    function safeTransferFrom(IERC20 token, address from, address to, uint256 value) internal {
+        callOptionalReturn(token, abi.encodeWithSelector(token.transferFrom.selector, from, to, value));
+    }
+
+    function safeApprove(IERC20 token, address spender, uint256 value) internal {
+        require((value == 0) || (token.allowance(address(this), spender) == 0),
+            "SafeERC20: approve from non-zero to non-zero allowance"
+        );
+        callOptionalReturn(token, abi.encodeWithSelector(token.approve.selector, spender, value));
+    }
+
+    function safeIncreaseAllowance(IERC20 token, address spender, uint256 value) internal {
+        uint256 newAllowance = token.allowance(address(this), spender).safeAdd(value);
+        callOptionalReturn(token, abi.encodeWithSelector(token.approve.selector, spender, newAllowance));
+    }
+
+    function safeDecreaseAllowance(IERC20 token, address spender, uint256 value) internal {
+        uint256 newAllowance = token.allowance(address(this), spender).safeSub(value);
+        callOptionalReturn(token, abi.encodeWithSelector(token.approve.selector, spender, newAllowance));
+    }
+    function callOptionalReturn(IERC20 token, bytes memory data) private {
+        require(address(token).isContract(), "SafeERC20: call to non-contract");
+
+        // solhint-disable-next-line avoid-low-level-calls
+        (bool success, bytes memory returndata) = address(token).call(data);
+        require(success, "SafeERC20: low-level call failed");
+
+        if (returndata.length > 0) { // Return data is optional
+            // solhint-disable-next-line max-line-length
+            require(abi.decode(returndata, (bool)), "SafeERC20: ERC20 operation did not succeed");
+        }
+    }
+}
+
+// File: contracts/core/Interfaces.sol
+
+pragma solidity >=0.4.21 <0.6.0;
+
+contract UniswapV3Interface{
+    function swapExactTokensForTokens(uint256 amountIn, uint256 amountOutMin, address[] calldata path, address to) external payable returns (uint256 amountOut);
+}
+contract CurveInterface256{
+    function exchange(uint256 i, uint256 j, uint256 dx, uint256 min_dy) external payable returns(uint256);//change i to j
+    //0 weth, 1 crv
+}
+contract CurveInterface128{
+    function exchange(int128 i, int128 j, uint256 dx, uint256 min_dy) external returns(uint256);
+    function get_dy(int128 i, int128 j, uint256 dx) external view returns(uint256);
+    //0 crv, 1 cvxcrv
+}
+contract CurveInterface256NoReturn{
+    function exchange(uint256 i, uint256 j, uint256 dx, uint256 min_dy) external payable;
+}
+contract TriPoolInterface{
+    function remove_liquidity_one_coin(uint256 _token_amount, int128 i, uint256 min_amount) external;//DAI, USDC, USDT
+}
+contract ConvexInterface{
+    function stake(uint256 amount) public returns(bool);
+    function withdraw(uint256 amount, bool claim) public returns(bool);
+    function getReward() external returns(bool);
+    function withdrawAll(bool claim) public;
+}
+contract ChainlinkInterface{
+  function latestAnswer() external view returns (int256);
+}
+
+// File: contracts/core/EFCRVVault.sol
+
+pragma solidity >=0.4.21 <0.6.0;
+
+
+
+
+
+
 
 contract TokenInterfaceERC20{
   function destroyTokens(address _owner, uint _amount) public returns(bool);
@@ -14,7 +246,7 @@ contract TokenInterfaceERC20{
 
 contract EFCRVVault is Ownable, ReentrancyGuard{
   using SafeERC20 for IERC20;
-  using SafeMath for uint256;
+  using SafeMathR for uint256;
   using Address for address;
 
   address public crv;
@@ -60,7 +292,7 @@ contract EFCRVVault is Ownable, ReentrancyGuard{
     cvxcrv =  address(0x62B9c7356A2Dc64a1969e19C23e4f579F9810Aa7);
     eth_crv_router =  address(0x8301AE4fc9c624d1D396cbDAa1ed877821D7C511);
     crv_cvxcrv_router =  address(0x9D0464996170c6B9e75eED71c68B99dDEDf279e8);//curve128
-    eth_usdt_router =  address(0xD51a44d3FaE010294C616388b506AcdA1bfAAE46);
+    eth_usdt_router =  address(0xD51a44d3FaE010294C616388b506AcdA1bfAAE46);//curve no return
     usdt =  address(0xdAC17F958D2ee523a2206206994597C13D831ec7);
     oracle =  address(0xCd627aA160A6fA45Eb793D19Ef54f5062F20f33f);
     staker = address(0x3Fe65692bfCD0e6CF84cB1E7d24108E434A7587e);
@@ -276,7 +508,7 @@ contract EFCRVVault is Ownable, ReentrancyGuard{
       TriPoolInterface(router).remove_liquidity_one_coin(IERC20(_token).balanceOf(address(this)), 2, 0);
       IERC20(usdt).safeApprove(eth_usdt_router, 0);
       IERC20(usdt).safeApprove(eth_usdt_router, IERC20(usdt).balanceOf(address(this)));
-      CurveInterface256(eth_usdt_router).exchange(0, 2, IERC20(usdt).balanceOf(address(this)), 0);      
+      CurveInterface256NoReturn(eth_usdt_router).exchange(0, 2, IERC20(usdt).balanceOf(address(this)), 0);      
       _exchange_weth();
     }
   }
@@ -350,16 +582,4 @@ contract EFCRVVault is Ownable, ReentrancyGuard{
     require(status, "call failed");
   }
   function() external payable{}
-}
-
-contract EFCRVVaultFactory{
-  event NewCFVault(address addr);
-
-  function createCFVault(address _ef_token) public returns(address){
-    EFCRVVault cf = new EFCRVVault(_ef_token);
-    cf.transferOwnership(msg.sender);
-    emit NewCFVault(address(cf));
-    return address(cf);
-  }
-
 }
