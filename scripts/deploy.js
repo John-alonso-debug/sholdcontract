@@ -44,9 +44,8 @@ async function main() {
   //await vault.deployed();
 
   console.log(
-      `AddressArray lib deployed to ${lib.address}`
+    `vault deployed to ${vault.address}`
   );
-  console.log(`contractTrustList deployed at: ${contractTrustList.address}\n`);
 
 
 
