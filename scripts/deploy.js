@@ -22,6 +22,7 @@ async function main() {
   await lib.deployed();
 
 
+
   const token = await deployContract(deployer, "ERC20Token", []);
   await token.deployed();
   //const vault = await deployContract(deployer, "EFCRVVault",constants.curveAave);
@@ -48,6 +49,23 @@ async function main() {
   );
 
 
+
+  const Lib2 = await ethers.getContractFactory("SafeMath");
+  const lib2 = await Lib2.deploy();
+  await lib2.deployed();
+
+  const ercApprove = await ethers.getContractFactory( "ERC20DepositApprover", {
+        signer: deployer,
+        libraries:{
+          SafeMath: lib2.address
+        }
+      }
+  );
+  const ErcApprove=await ercApprove.deploy();
+
+  console.log(
+      `ercApprove deployed to ${ErcApprove.address}`
+  );
 
 }
 

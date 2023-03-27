@@ -290,7 +290,7 @@ pragma solidity >=0.6.0 <0.8.0;
  * Using this library instead of the unchecked operations eliminates an entire
  * class of bugs, so it's recommended to use it always.
  */
-library SafeMath {
+library SafeMath1 {
     /**
      * @dev Returns the addition of two unsigned integers, with an overflow flag.
      *
@@ -874,7 +874,7 @@ pragma solidity >=0.6.0 <0.8.0;
  * which allows you to call the safe operations as `token.safeTransfer(...)`, etc.
  */
 library SafeERC20 {
-    using SafeMath for uint256;
+    using SafeMath1 for uint256;
     using Address for address;
 
     function safeTransfer(IERC20 token, address to, uint256 value) internal {
@@ -1039,7 +1039,7 @@ pragma solidity >=0.6.0 <0.8.0;
  * allowances. See {IERC20-approve}.
  */
 contract ERC20 is Context, IERC20 {
-    using SafeMath for uint256;
+    using SafeMath1 for uint256;
 
     mapping(address => uint256) private _balances;
 
@@ -1377,7 +1377,7 @@ pragma solidity 0.6.12;
 contract ERC20Token is ERC20 {
     using SafeERC20 for IERC20;
     using Address for address;
-    using SafeMath for uint256;
+    using SafeMath1 for uint256;
 
     address public operator;
 
