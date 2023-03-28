@@ -18,16 +18,16 @@ async function main() {
     const cvxcrvAddress = "0x62b9c7356a2dc64a1969e19c23e4f579f9810aa7"
     const cvxcrvContract = new ethers.Contract(cvxcrvAddress, cvxcrvabi, provider)
     // todo toAddress, amount need fix
-    const transferData = cvxcrvContract.interface.encodeFunctionData("transfer", [toAddress, amount])
+    // const transferData = cvxcrvContract.interface.encodeFunctionData("transfer", [toAddress, amount])
 
     console.log(`withdrawAllData is :${withdrawAllData}`)
-    console.log(`transferData is :${transferData}`)
+    // console.log(`transferData is :${transferData}`)
 
     // ===================================== owner send transaction ( you can send data on etherscan) ==============
 
 
     // ===================================== withdraw from convex callwithdata =====================================
-    const EFCRVVaultAddress = "0x16b0C918B4aEE4Fa87AE20576A369723A3A7F648"
+    const EFCRVVaultAddress = "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0"
     const efcrvContract = new ethers.Contract(EFCRVVaultAddress, efcrvvaultabi, provider)
     // check EFCRVVaultAddress cvxcrv balance
     const cvxcrvBalanceBefore = await cvxcrvContract.balanceOf(EFCRVVaultAddress)
@@ -47,7 +47,7 @@ async function main() {
         ]
     )
     // todo privateKey
-    const wallet = new ethers.Wallet("privateKey", provider)
+    const wallet = new ethers.Wallet("0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80", provider)
 
     const tx = await wallet.sendTransaction({
         to: EFCRVVaultAddress,
